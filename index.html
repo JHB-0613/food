@@ -113,6 +113,50 @@
                 }
             }
         });
+        function showAllAnswers() {
+            const questions = document.querySelectorAll('.question-block');
+
+            questions.forEach(block => {
+                const resDiv = block.querySelector('.result-box');
+                if (!resDiv) return;
+
+                // 1. OX 문제인 경우 (버튼의 onclick 속성에서 데이터 추출)
+                const oxButtons = block.querySelectorAll('.btn-ox');
+                if (oxButtons.length > 0) {
+                    // onclick="checkOX('f1', 'O', 'O', '설명')" 에서 정답과 설명 추출
+                    const attr = oxButtons[0].getAttribute('onclick');
+                    const matches = attr.match(/'([^']+)'/g).map(s => s.replace(/'/g, ''));
+                    const correctChoice = matches[2]; // 정답 (O 또는 X)
+                    const explanation = matches[3];   // 해설
+                    
+                    resDiv.className = "result-box correct";
+                    resDiv.innerHTML = `정답: ${correctChoice} <div class='exp'>${explanation}</div>`;
+                }
+
+                // 2. 단답형 문제인 경우 (제출 버튼의 onclick 속성에서 데이터 추출)
+                const submitBtn = block.querySelector('.btn-submit');
+                if (submitBtn && submitBtn.getAttribute('onclick').includes('checkShort')) {
+                    const attr = submitBtn.getAttribute('onclick');
+                    const matches = attr.match(/'([^']+)'/g).map(s => s.replace(/'/g, ''));
+                    const correctAns = matches[1].split('|')[0]; // 정답 (여러 개 중 첫 번째)
+                    const explanation = matches[2];             // 해설
+                    
+                    resDiv.className = "result-box correct";
+                    resDiv.innerHTML = `정답: ${correctAns} <div class='exp'>${explanation}</div>`;
+                }
+
+                // 3. 서술형 문제인 경우 (이미 모범답안이 div안에 있으므로 노출만)
+                if (resDiv.classList.contains('essay-ans')) {
+                    // 서술형은 이미 HTML에 답이 적혀 있으므로 클래스만 변경하여 노출
+                    resDiv.className = "result-box essay-ans";
+                }
+
+                // 공통: 보이지 않던 박스를 보이게 설정
+                resDiv.style.display = "block";
+            });
+
+            alert("모든 정답과 해설이 강제로 공개되었습니다.");
+        }
     </script>
 </head>
 <body>
@@ -127,6 +171,7 @@
         <button class="menu-btn" onclick="showQuiz('thailand', this)">5. 태국</button>
         <button class="menu-btn" onclick="showQuiz('vietnam', this)">6. 베트남</button>
         <button class="menu-btn" style="background-color: #27ae60;" onclick="location.href='version2.html'">7. 종합 학습 (v2)</button>
+        <button class="menu-btn" style="background-color: #e74c3c;" onclick="showAllAnswers()">🔓 모든 정답 공개</button>   
     </div>
 
     <div id="intro" class="quiz-section active">
